@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cadenas — V1 · 01 Laiton</title>
+<style>
+/* ===== Tokens — direction 01 « Laiton » ===== */
+:root{
+  --bg:#14100c; --bg-2:#1c1610; --line:#3a2d1d;
+  --ink:#ece0c4; --muted:#8f7d5e;
+  --brass:#b08d57; --brass-hi:#d9b878; --brass-lo:#5e4727; --glint:#f4d06f;
+  --serif:Georgia,"Iowan Old Style","Palatino Linotype",Palatino,"Liberation Serif","DejaVu Serif",serif;
+  --sans:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"DejaVu Sans Mono",monospace;
+  /* host (Reddit-like, neutral, sans marque) */
+  --h-bg:#0f1011; --h-card:#16171a; --h-line:#25272b; --h-ink:#d7d9dc; --h-muted:#7d8085;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#0a0a0a;color:#c9c9c9;font-family:var(--sans)}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+
+/* ===== Planche ===== */
+.toolbar{position:sticky;top:0;z-index:5;display:flex;gap:12px;align-items:center;padding:10px 24px;background:#0a0a0aee;border-bottom:1px solid #1d1d1d;font:12px var(--mono);color:#8a8a8a}
+.toolbar b{color:#e5e5e5;font-weight:600}
+.toolbar button{margin-left:auto;border:1px solid #333;border-radius:999px;padding:4px 12px;color:#ddd}
+.stage{padding:24px;overflow:hidden}
+.board{transform-origin:0 0;display:inline-flex;flex-direction:column;gap:28px}
+.intro{display:flex;gap:48px;align-items:flex-end}
+.intro h1{font:400 44px/1 var(--serif);color:var(--ink);letter-spacing:.02em}
+.intro h1 small{display:block;font:12px var(--mono);letter-spacing:.2em;color:var(--muted);margin-bottom:10px;text-transform:uppercase}
+.intro p{max-width:560px;font-size:14px;line-height:1.5;color:#9b9b9b}
+.swatches{display:flex;gap:8px;margin-left:auto}
+.sw{width:92px;font:11px/1.4 var(--mono);color:#8a8a8a}
+.sw i{display:block;height:44px;border-radius:6px;margin-bottom:6px;border:1px solid #ffffff14}
+.row{display:flex;gap:40px;align-items:flex-start}
+.cap{font:11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#7a7a7a;margin-bottom:10px}
+.frame{position:relative;overflow:hidden;border-radius:6px;box-shadow:0 0 0 1px #262626,0 30px 80px #000c;background:var(--h-bg)}
+.desk{width:1440px;height:900px}
+.mob{width:390px;height:844px;border-radius:28px}
+
+/* ===== Hôte (cadre post) ===== */
+.h-top{height:56px;display:flex;align-items:center;gap:16px;padding:0 20px;border-bottom:1px solid var(--h-line);background:var(--h-bg)}
+.h-ph{width:32px;height:32px;border-radius:8px;background:#2a2c30}
+.h-search{flex:0 1 560px;margin:0 auto;height:38px;border-radius:999px;background:#1d1f22;color:var(--h-muted);font-size:14px;display:flex;align-items:center;padding:0 18px}
+.h-av{width:32px;height:32px;border-radius:50%;background:#2a2c30}
+.h-body{display:flex;gap:24px;justify-content:center;padding:16px 24px}
+.h-rail{width:220px;display:flex;flex-direction:column;gap:14px;padding-top:8px}
+.h-rail span{height:12px;border-radius:6px;background:#1c1e21}
+.h-rail span:nth-child(odd){width:70%}
+.h-side{width:300px}
+.h-side .card{border-radius:12px;background:var(--h-card);padding:16px;display:flex;flex-direction:column;gap:12px}
+.h-side .card b{font-size:14px;color:var(--h-ink)}
+.h-side .card span{height:10px;border-radius:5px;background:#24262a}
+.post{width:760px;border-radius:12px;background:var(--h-card);padding:12px}
+.p-head{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--h-muted)}
+.p-head i{width:28px;height:28px;border-radius:50%;background:var(--brass-lo);box-shadow:inset 0 0 0 2px var(--brass)}
+.p-head b{color:var(--h-ink);font-weight:600}
+.p-title{font:600 18px/1.3 var(--sans);color:var(--h-ink);margin:8px 0 10px}
+.p-act{display:flex;gap:10px;margin-top:10px}
+.p-act span{font-size:12px;font-weight:600;color:var(--h-ink);background:#202226;border-radius:999px;padding:7px 14px}
+.desk .slot{width:736px;height:620px;border-radius:10px;overflow:hidden}
+.mob .h-top{height:48px;padding:0 14px}
+.mob .h-search{height:32px;font-size:13px}
+.mob .post{width:auto;border-radius:0;padding:10px 0 0;background:var(--h-bg)}
+.mob .p-head,.mob .p-title{padding:0 14px}
+.mob .p-title{font-size:15px;margin:6px 0 8px}
+.mob .slot{width:390px;height:672px}
+.mob .p-act{padding:0 14px;margin-top:8px}
+
+/* ===== JEU — composant ===== */
+.g{container-type:inline-size;width:100%;height:100%;background:
+  radial-gradient(120% 70% at 18% 0%,#3a2a1640 0%,transparent 60%),var(--bg);color:var(--ink);font-family:var(--sans)}
+.gi{--k:1;height:100%;display:flex;flex-direction:column;gap:calc(var(--k)*12px);padding:calc(var(--k)*14px) 16px calc(var(--k)*16px)}
+.g-top{display:flex;align-items:baseline;justify-content:space-between}
+.mark{font:400 13px var(--serif);letter-spacing:.34em;color:var(--brass)}
+.meta{display:flex;gap:14px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.meta b{font:400 15px var(--serif);color:var(--ink);margin-right:3px}
+.rule{font-size:13px;color:var(--muted);text-align:center;line-height:1.35}
+.rule em{font-style:normal;color:var(--ink)}
+.main{display:flex;flex-direction:column;align-items:center;gap:calc(var(--k)*14px);flex:1;min-height:0}
+
+/* le cadenas */
+.lock{position:relative;width:calc(var(--k)*292px);display:flex;flex-direction:column;align-items:center}
+.shackle{width:66%;height:calc(var(--k)*84px);display:block;margin-bottom:calc(var(--k)*-8px);transition:transform .5s cubic-bezier(.2,.9,.3,1.3)}
+.body{position:relative;width:100%;border-radius:calc(var(--k)*26px);padding:calc(var(--k)*16px) calc(var(--k)*16px) calc(var(--k)*12px);
+  background:linear-gradient(172deg,#dcbb7c 0%,var(--brass) 24%,#8b6b3d 62%,var(--brass-lo) 100%);
+  box-shadow:inset 0 2px 0 #ffecbe99,inset 0 -12px 26px #0000005c,0 26px 50px #000000a0,0 2px 0 #000;overflow:hidden}
+.body::before{content:"";position:absolute;inset:0;background:linear-gradient(112deg,transparent 34%,#f4d06f55 46%,transparent 56%);background-size:260% 100%;animation:glint 7s ease-in-out infinite;pointer-events:none}
+@keyframes glint{0%,60%{background-position:120% 0}100%{background-position:-60% 0}}
+.window{display:flex;gap:calc(var(--k)*7px);justify-content:center;padding:calc(var(--k)*7px);border-radius:calc(var(--k)*12px);background:#120d08;box-shadow:inset 0 3px 8px #000,0 1px 0 #ffe2a466}
+.drum{position:relative;width:calc(var(--k)*54px);height:calc(var(--k)*112px);border-radius:calc(var(--k)*6px);overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:linear-gradient(180deg,#2e2312 0%,#9c7a45 20%,#e6c886 47%,#b89358 60%,#5b4422 84%,#2a1f10 100%)}
+.drum::before,.drum::after{content:"";position:absolute;top:0;bottom:0;width:calc(var(--k)*5px);background:repeating-linear-gradient(180deg,#00000066 0 2px,#ffe6a833 2px 4px)}
+.drum::before{left:0}.drum::after{right:0}
+.n{font-family:var(--serif);line-height:1;color:#22180b;font-variant-numeric:lining-nums}
+.n.cur{font-size:calc(var(--k)*46px);text-shadow:0 1px 0 #fff0c870,0 -1px 0 #00000030}
+.n.adj{font-size:calc(var(--k)*20px);color:#3a2a14;opacity:.55;transform:scaleY(.55);margin:calc(var(--k)*-2px) 0}
+.drum.active{box-shadow:0 0 0 1.5px var(--glint),0 0 18px #f4d06f55}
+.drum.active .n.cur{transform:translateY(-3px)}
+.labels{display:flex;gap:calc(var(--k)*7px);justify-content:center;margin-top:calc(var(--k)*8px)}
+.labels span{width:calc(var(--k)*54px);text-align:center;font:400 calc(var(--k)*12px) var(--serif);letter-spacing:.12em;color:#3b2b15;text-shadow:0 1px 0 #ffe9b680}
+.labels span.on{color:#1d1409}
+.engrave{margin-top:calc(var(--k)*8px);text-align:center;font:400 calc(var(--k)*10px) var(--serif);letter-spacing:.5em;color:#4a3618;text-shadow:0 1px 0 #ffe9b670}
+
+/* l'étiquette d'indices */
+.tag{position:relative;width:100%;max-width:340px;border-radius:12px;background:var(--bg-2);border:1px solid var(--line);padding:12px 14px 10px 14px;box-shadow:0 14px 30px #00000070}
+.tag::before{content:"";position:absolute;left:50%;top:-15px;width:1px;height:15px;background:#6b5634}
+.tag::after{content:"";position:absolute;left:calc(50% - 5px);top:8px;width:10px;height:10px;border-radius:50%;background:var(--bg);box-shadow:inset 0 0 0 1px #6b5634}
+.tag h3{display:flex;justify-content:space-between;font:500 11px var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:2px 0 8px}
+.clues{list-style:none;display:flex;flex-direction:column}
+.clues li{display:flex;align-items:center;gap:8px;height:28px;border-top:1px solid #2a2117;font-size:14px;color:var(--ink)}
+.clues li:first-child{border-top:0}
+.clues .no{width:18px;font:11px var(--mono);color:#5e5038}
+.d{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:20px;padding:0 5px;border-radius:4px;border:1px solid #6b5634;font:400 12px var(--serif);letter-spacing:.06em;color:var(--brass-hi)}
+.op{color:var(--muted);font-size:14px;width:12px;text-align:center}
+.v{font:400 17px var(--serif);color:var(--ink)}
+.w{color:var(--muted)}
+
+/* bouton */
+.open{width:100%;max-width:340px;height:52px;border-radius:999px;font:400 15px var(--serif);letter-spacing:.28em;text-transform:uppercase;color:#1a120a;
+  background:linear-gradient(180deg,var(--brass-hi),var(--brass) 55%,#957343);box-shadow:inset 0 1px 0 #fff2c8aa,inset 0 -2px 0 #00000040,0 10px 24px #00000080;transition:transform .08s}
+.open:active,.open.pressed{transform:translateY(1px) scale(.985);box-shadow:inset 0 2px 6px #00000060}
+.foot{display:flex;flex-direction:column;align-items:center;gap:8px}
+
+/* desktop : deux colonnes */
+@container (min-width:600px){
+  .gi{--k:1.42;padding:22px 36px 26px;gap:16px}
+  .tag{transform:translateY(-10px)}
+  .main{flex-direction:row;justify-content:center;align-items:center;gap:56px}
+  .tag{max-width:320px}
+  .rule{text-align:left}
+  .foot{flex-direction:row;justify-content:center;gap:24px}
+  .open{max-width:300px}
+}
+
+/* ===== États ===== */
+.states{width:340px;display:flex;flex-direction:column;gap:18px}
+.st{border-radius:10px;background:var(--bg);border:1px solid #241c12;padding:16px}
+.st h4{font:11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#7c6c50;margin-bottom:12px}
+.st .trio{display:flex;gap:14px;align-items:flex-end}
+.st .trio div{display:flex;flex-direction:column;align-items:center;gap:6px;font:10px var(--mono);color:#6f6248}
+.st .open{height:44px;font-size:13px}
+.st .stack{display:flex;flex-direction:column;gap:10px}
+.locked{display:flex;gap:10px;align-items:center;border-radius:10px;padding:10px 12px;background:#1f150c;border:1px solid #5a3a1c;color:var(--ink);font-size:13px;animation:shake .5s 1s 3}
+.locked i{width:8px;height:8px;border-radius:50%;background:#c4733a;flex:none}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-5px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
+.loading{height:96px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:#100c08;color:var(--muted);font:400 14px var(--serif);letter-spacing:.08em}
+.loading span{animation:breathe 1.6s ease-in-out infinite}
+@keyframes breathe{50%{opacity:.4}}
+.notes{font-size:12px;line-height:1.55;color:#8d8170}
+.notes li{margin-left:16px;margin-bottom:4px}
+.notes b{color:#cdbb98;font-weight:600}
+.op{font-family:var(--serif)}
+</style>
+</head>
+<body>
+<div class="toolbar"><b>Cadenas</b> · V1 · Page « Jeu » · Direction 01 / 03 — Laiton <button id="fit">Taille réelle</button></div>
+<div class="stage"><div class="board" id="board">
+
+  <div class="intro">
+    <h1><small>Direction 01</small>Laiton</h1>
+    <p>Le cadenas est un objet en laiton qu'on tient en main : quatre tambours moletés sous lumière rasante, une étiquette d'indices qui pend à l'anse. Chiffres en serif gravée, indices en sans. La récompense est mécanique : cascade de clics, anse qui se lève.</p>
+    <div class="swatches">
+      <div class="sw"><i style="background:#14100c"></i>Fond<br>#14100c</div>
+      <div class="sw"><i style="background:#b08d57"></i>Laiton · accent<br>#b08d57</div>
+      <div class="sw"><i style="background:#f4d06f"></i>Reflet<br>#f4d06f</div>
+      <div class="sw"><i style="background:#ece0c4"></i>Encre<br>#ece0c4</div>
+      <div class="sw"><i style="background:#8f7d5e"></i>Secondaire<br>#8f7d5e</div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div>
+      <div class="cap">Desktop · 1440 × 900 · post ouvert</div>
+      <div class="frame desk">
+        <div class="h-top"><i class="h-ph"></i><div class="h-search">Search</div><i class="h-av"></i></div>
+        <div class="h-body">
+          <aside class="h-rail"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></aside>
+          <article class="post">
+            <div class="p-head"><i></i><div><b>r/cadenas_dev</b> · 2 h · u/cadenas-app</div></div>
+            <div class="p-title">Cadenas · Friday, December 11</div>
+            <div class="slot" data-game></div>
+            <div class="p-act"><span>86 comments</span><span>Share</span></div>
+          </article>
+          <aside class="h-side"><div class="card"><b>r/cadenas_dev</b><span></span><span style="width:80%"></span><span style="width:60%"></span></div></aside>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="cap">Mobile · 390 × 844 · post ouvert</div>
+      <div class="frame mob">
+        <div class="h-top"><i class="h-ph"></i><div class="h-search">Search</div><i class="h-av"></i></div>
+        <article class="post">
+          <div class="p-head"><i></i><div><b>r/cadenas_dev</b> · 2 h</div></div>
+          <div class="p-title">Cadenas · Friday, December 11</div>
+          <div class="slot" data-game></div>
+          <div class="p-act"><span>86 comments</span><span>Share</span></div>
+        </article>
+      </div>
+    </div>
+
+    <div class="states">
+      <div class="cap">États</div>
+      <div class="st"><h4>Molette</h4>
+        <div class="trio">
+          <div><div class="drum" style="--k:1"><span class="n adj">2</span><span class="n cur">3</span><span class="n adj">4</span></div>repos</div>
+          <div><div class="drum active" style="--k:1"><span class="n adj">4</span><span class="n cur">5</span><span class="n adj">6</span></div>en rotation</div>
+          <div><div class="drum" style="--k:1;filter:brightness(1.12)"><span class="n adj">9</span><span class="n cur">0</span><span class="n adj">1</span></div>survol</div>
+        </div>
+      </div>
+      <div class="st"><h4>Ouvrir</h4>
+        <div class="stack">
+          <button class="open">Open the lock</button>
+          <button class="open pressed">Open the lock</button>
+          <div class="locked"><i></i>Still locked. At least one clue is broken.</div>
+        </div>
+      </div>
+      <div class="st"><h4>Chargement</h4><div class="loading"><span>Oiling the locks…</span></div></div>
+      <div class="st"><h4>Mouvement</h4>
+        <ul class="notes">
+          <li><b>Cran</b> : un tap = un cran, le tambour roule 120 ms et se cale avec un léger rebond ; clic sec.</li>
+          <li><b>Glissé vertical</b> sur un tambour : plusieurs crans, un clic par chiffre.</li>
+          <li><b>Ouverture</b> : clics en cascade I→IV (80 ms d'écart), puis l'anse se lève de 14 px avec un reflet qui balaie le corps.</li>
+          <li><b>Échec</b> : le corps tremble 3 fois, le message reste.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<template id="game">
+  <div class="g"><div class="gi">
+    <header class="g-top">
+      <span class="mark">CADENAS</span>
+      <span class="meta"><span>Dec 11</span><span>01:42</span><span><b>12</b>day streak</span></span>
+    </header>
+    <div class="main">
+      <div class="lock">
+        <svg class="shackle" viewBox="0 0 200 120" aria-hidden="true">
+          <defs><linearGradient id="sh1" x1="0" x2="1"><stop offset="0" stop-color="#4a3820"/><stop offset=".3" stop-color="#e0c182"/><stop offset=".55" stop-color="#b08d57"/><stop offset="1" stop-color="#3e2f1a"/></linearGradient></defs>
+          <path d="M34 120 V78 A66 66 0 0 1 166 78 V120" fill="none" stroke="url(#sh1)" stroke-width="24"/>
+        </svg>
+        <div class="body">
+          <div class="window" data-drums></div>
+          <div class="labels"><span>I</span><span>II</span><span>III</span><span class="on">IV</span></div>
+          <div class="engrave">CADENAS</div>
+        </div>
+      </div>
+      <div class="tag">
+        <h3><span>&nbsp;</span><span>7 clues</span></h3>
+        <ol class="clues" data-clues></ol>
+      </div>
+    </div>
+    <div class="foot">
+      <p class="rule">Turn the dials until <em>every clue is true</em>.</p>
+      <button class="open">Open the lock</button>
+    </div>
+  </div></div>
+</template>
+
+<script>
+// Données réelles : generateCadenas('2026-12-11') — solution 6 3 0 3. Le joueur est en cours (6 3 0 5), molette IV en main.
+const combo=[6,3,0,5], active=3;
+const R=['I','II','III','IV'];
+const clues=[
+  ['ne',3,4],['sum',1,2,3],['par',1,'odd'],['sum',1,3,6],['sum',0,1,9],['par',3,'odd'],['gt',1,2]
+];
+const d=i=>`<span class="d">${R[i]}</span>`;
+const clueHTML=c=>{
+  if(c[0]==='sum')return `${d(c[1])}<span class="op">+</span>${d(c[2])}<span class="op">=</span><span class="v">${c[3]}</span>`;
+  if(c[0]==='ne')return `${d(c[1])}<span class="op">≠</span><span class="v">${c[2]}</span>`;
+  if(c[0]==='gt')return `${d(c[1])}<span class="op">&gt;</span>${d(c[2])}`;
+  return `${d(c[1])}<span class="w">is ${c[2]}</span>`;
+};
+const tpl=document.getElementById('game');
+document.querySelectorAll('[data-game]').forEach(slot=>{
+  slot.appendChild(tpl.content.cloneNode(true));
+  slot.querySelector('[data-drums]').innerHTML=combo.map((v,i)=>
+    `<div class="drum${i===active?' active':''}"><span class="n adj">${(v+9)%10}</span><span class="n cur">${v}</span><span class="n adj">${(v+1)%10}</span></div>`).join('');
+  slot.querySelector('[data-clues]').innerHTML=clues.map((c,i)=>`<li><span class="no">${String(i+1).padStart(2,'0')}</span>${clueHTML(c)}</li>`).join('');
+});
+// ajustement à la fenêtre
+const board=document.getElementById('board'),stage=board.parentElement,btn=document.getElementById('fit');let real=false;
+function fit(){const s=real?1:Math.min(1,(innerWidth-48)/board.scrollWidth);board.style.transform=`scale(${s})`;stage.style.height=(board.scrollHeight*s+48)+'px';btn.textContent=real?'Ajuster à la fenêtre':'Taille réelle'}
+btn.onclick=()=>{real=!real;fit()};addEventListener('resize',fit);fit();
+</script>
+</body>
+</html>
