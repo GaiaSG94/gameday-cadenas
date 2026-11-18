@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cadenas — V1 · 03 Vitrine</title>
+<style>
+/* ===== Tokens — direction 03 « Vitrine » (s'écarte du brief : fond clair) ===== */
+:root{
+  --bg:#ebe9e3; --floor:#f6f5f1; --paper:#fbfaf7; --line:#d9d6cd;
+  --ink:#1b1a17; --muted:#8a867c;
+  --brass:#a07a3e; --brass-hi:#d8bb7f; --brass-lo:#5e4727;
+  --serif:Georgia,"Iowan Old Style","Palatino Linotype",Palatino,"Liberation Serif","DejaVu Serif",serif;
+  --sans:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"DejaVu Sans Mono",monospace;
+  --h-bg:#f4f4f2; --h-card:#ffffff; --h-line:#e3e3e0; --h-ink:#1c1c1c; --h-muted:#76777a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#dcdad4;color:#3a3936;font-family:var(--sans)}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+/* ===== Planche ===== */
+.toolbar{position:sticky;top:0;z-index:5;display:flex;gap:12px;align-items:center;padding:10px 24px;background:#0a0a0aee;border-bottom:1px solid #1d1d1d;font:12px var(--mono);color:#8a8a8a}
+.toolbar b{color:#e5e5e5;font-weight:600}
+.toolbar button{margin-left:auto;border:1px solid #333;border-radius:999px;padding:4px 12px;color:#ddd}
+.stage{padding:24px;overflow:hidden}
+.board{transform-origin:0 0;display:inline-flex;flex-direction:column;gap:28px}
+.intro{display:flex;gap:48px;align-items:flex-end}
+.intro h1{font:400 44px/1 var(--serif);color:var(--ink);letter-spacing:.02em}
+.intro h1 small{display:block;font:12px var(--mono);letter-spacing:.2em;color:var(--muted);margin-bottom:10px;text-transform:uppercase}
+.intro p{max-width:560px;font-size:14px;line-height:1.5;color:#9b9b9b}
+.swatches{display:flex;gap:8px;margin-left:auto}
+.sw{width:92px;font:11px/1.4 var(--mono);color:#8a8a8a}
+.sw i{display:block;height:44px;border-radius:6px;margin-bottom:6px;border:1px solid #ffffff14}
+.row{display:flex;gap:40px;align-items:flex-start}
+.cap{font:11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#7a7a7a;margin-bottom:10px}
+.frame{position:relative;overflow:hidden;border-radius:6px;box-shadow:0 0 0 1px #262626,0 30px 80px #000c;background:var(--h-bg)}
+.desk{width:1440px;height:900px}
+.mob{width:390px;height:844px;border-radius:28px}
+
+/* ===== Hôte (cadre post) ===== */
+.h-top{height:56px;display:flex;align-items:center;gap:16px;padding:0 20px;border-bottom:1px solid var(--h-line);background:var(--h-bg)}
+.h-ph{width:32px;height:32px;border-radius:8px;background:#2a2c30}
+.h-search{flex:0 1 560px;margin:0 auto;height:38px;border-radius:999px;background:#1d1f22;color:var(--h-muted);font-size:14px;display:flex;align-items:center;padding:0 18px}
+.h-av{width:32px;height:32px;border-radius:50%;background:#2a2c30}
+.h-body{display:flex;gap:24px;justify-content:center;padding:16px 24px}
+.h-rail{width:220px;display:flex;flex-direction:column;gap:14px;padding-top:8px}
+.h-rail span{height:12px;border-radius:6px;background:#1c1e21}
+.h-rail span:nth-child(odd){width:70%}
+.h-side{width:300px}
+.h-side .card{border-radius:12px;background:var(--h-card);padding:16px;display:flex;flex-direction:column;gap:12px}
+.h-side .card b{font-size:14px;color:var(--h-ink)}
+.h-side .card span{height:10px;border-radius:5px;background:#24262a}
+.post{width:760px;border-radius:12px;background:var(--h-card);padding:12px}
+.p-head{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--h-muted)}
+.p-head i{width:28px;height:28px;border-radius:50%;background:var(--brass-lo);box-shadow:inset 0 0 0 2px var(--brass)}
+.p-head b{color:var(--h-ink);font-weight:600}
+.p-title{font:600 18px/1.3 var(--sans);color:var(--h-ink);margin:8px 0 10px}
+.p-act{display:flex;gap:10px;margin-top:10px}
+.p-act span{font-size:12px;font-weight:600;color:var(--h-ink);background:#202226;border-radius:999px;padding:7px 14px}
+.desk .slot{width:736px;height:620px;border-radius:10px;overflow:hidden}
+.mob .h-top{height:48px;padding:0 14px}
+.mob .h-search{height:32px;font-size:13px}
+.mob .post{width:auto;border-radius:0;padding:10px 0 0;background:var(--h-bg)}
+.mob .p-head,.mob .p-title{padding:0 14px}
+.mob .p-title{font-size:15px;margin:6px 0 8px}
+.mob .slot{width:390px;height:672px}
+.mob .p-act{padding:0 14px;margin-top:8px}
+
+
+/* hôte clair : surcharges */
+.toolbar{background:#dcdad4ee;border-color:#c9c6be;color:#6f6c64}.toolbar b{color:#1b1a17}.toolbar button{border-color:#b9b5ab;color:#1b1a17}
+.intro h1{color:var(--ink)}.intro p{color:#55524b}.sw{color:#6f6c64}.cap{color:#77746b}
+.frame{box-shadow:0 0 0 1px #c9c6be,0 30px 70px #0000002a}
+.h-ph,.h-av{background:#e2e2df}.h-search{background:#ececea}.h-rail span,.h-side .card span{background:#e7e7e4}.p-act span{background:#efefed}
+
+/* ===== JEU — composant ===== */
+.g{container-type:inline-size;width:100%;height:100%;color:var(--ink);font-family:var(--sans);
+  background:radial-gradient(140% 55% at 50% 108%,var(--floor) 0 52%,transparent 52.3%),linear-gradient(180deg,#e6e4dd,var(--bg) 60%)}
+.gi{--k:1;height:100%;display:flex;flex-direction:column;gap:10px;padding:14px 18px 16px}
+.g-top{display:flex;justify-content:space-between;align-items:baseline;font:11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.g-top .mark{color:var(--ink);letter-spacing:.32em}
+.g-top b{color:var(--ink);font-weight:500}
+.main{display:flex;flex-direction:column;align-items:center;gap:14px;flex:1;min-height:0}
+.obj{position:relative;display:flex;flex-direction:column;align-items:center;padding-bottom:calc(var(--k)*18px)}
+.obj::after{content:"";position:absolute;bottom:0;left:50%;translate:-50% 0;width:88%;height:calc(var(--k)*22px);border-radius:50%;background:radial-gradient(closest-side,#00000038,transparent);z-index:0}
+
+/* cadenas plat, lumière de studio */
+.shackle{width:calc(var(--k)*170px);height:calc(var(--k)*92px);display:block;margin-bottom:calc(var(--k)*-10px);position:relative;z-index:1}
+.body{position:relative;z-index:1;width:calc(var(--k)*270px);border-radius:calc(var(--k)*18px) calc(var(--k)*18px) calc(var(--k)*34px) calc(var(--k)*34px);padding:calc(var(--k)*20px) calc(var(--k)*18px) calc(var(--k)*16px);
+  background:linear-gradient(180deg,#e9d2a0 0%,#c9a568 18%,var(--brass) 55%,#7d5e2f 100%);
+  box-shadow:inset 0 1px 0 #fff6dc,inset 0 -8px 18px #00000035,0 2px 0 #6d522a}
+.cols{display:flex;justify-content:space-between}
+.col{display:flex;flex-direction:column;align-items:center;gap:calc(var(--k)*4px)}
+.chev{width:calc(var(--k)*44px);height:calc(var(--k)*20px);display:flex;align-items:center;justify-content:center;color:#4f3a1a}
+.chev svg{width:12px;height:8px}
+.win{width:calc(var(--k)*50px);height:calc(var(--k)*72px);border-radius:calc(var(--k)*25px);background:#2a2015;display:flex;align-items:center;justify-content:center;
+  box-shadow:inset 0 3px 6px #000000a0,0 1px 0 #fff0c8aa}
+.win b{font:400 calc(var(--k)*42px)/1 var(--serif);color:#f3e9d2}
+.col.active .win{box-shadow:inset 0 3px 6px #000000a0,0 0 0 2px #1b1a17}
+.col small{font:400 calc(var(--k)*11px) var(--serif);letter-spacing:.14em;color:#4f3a1a}
+.col.active small{color:#1b1a17}
+
+/* cartel d'indices */
+.card{width:100%;max-width:330px;background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:12px 16px 8px;box-shadow:0 1px 0 #fff inset,0 10px 24px #0000000d}
+.card h3{display:flex;justify-content:space-between;font:500 10px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--muted);padding-bottom:8px;border-bottom:1px solid var(--ink)}
+.clues{list-style:none;columns:2;column-gap:20px}
+.clues li{display:flex;align-items:center;gap:7px;height:30px;border-bottom:1px solid #ebe8e0;font-size:14px;break-inside:avoid}
+.d{font:400 14px var(--serif);letter-spacing:.04em;color:var(--ink);border-bottom:1.5px solid var(--brass);line-height:1.1}
+.op,.w{color:var(--muted)}
+.v{font:400 17px var(--serif)}
+
+.foot{display:flex;flex-direction:column;align-items:center;gap:8px}
+.open{width:100%;max-width:330px;height:50px;border-radius:999px;background:var(--ink);color:#f3efe6;font:600 13px var(--sans);letter-spacing:.22em;text-transform:uppercase;box-shadow:0 8px 18px #0000002a;transition:transform .08s}
+.open.pressed{transform:scale(.98);background:#000}
+.rule{font:11px var(--mono);letter-spacing:.04em;color:var(--muted);text-align:center}
+.rule em{font-style:normal;color:var(--ink)}
+
+@container (min-width:600px){
+  .gi{--k:1.38;padding:22px 36px 26px}
+  .main{flex-direction:row;justify-content:center;gap:60px}
+  .card{max-width:270px}
+  .clues{columns:1}
+  .foot{flex-direction:row;gap:28px}
+  .open{max-width:280px}
+}
+
+/* ===== États ===== */
+.states{width:340px;display:flex;flex-direction:column;gap:18px}
+.st{border-radius:6px;background:var(--bg);border:1px solid #d3d0c7;padding:16px}
+.st h4{font:11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#7f7b72;margin-bottom:12px}
+.trio{display:flex;gap:18px;align-items:flex-end;padding:12px;border-radius:12px;background:linear-gradient(180deg,#c9a568,var(--brass))}
+.trio>div{display:flex;flex-direction:column;align-items:center;gap:6px;font:10px var(--mono);color:#3b2a12}
+.stack{display:flex;flex-direction:column;gap:10px}
+.locked{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:4px;background:var(--paper);border:1px solid var(--line);font-size:13px;color:var(--ink);animation:shake .5s 1s 3}
+.locked i{width:8px;height:8px;border-radius:50%;background:#b4532a;flex:none}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-5px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
+.loading{height:90px;display:flex;align-items:center;justify-content:center;font:12px var(--mono);letter-spacing:.1em;color:var(--muted)}
+.loading span{animation:breathe 1.6s ease-in-out infinite}@keyframes breathe{50%{opacity:.35}}
+.notes{font-size:12px;line-height:1.55;color:#5b5850}
+.notes li{margin-left:16px;margin-bottom:4px}.notes b{color:#1b1a17}
+.op{font-family:var(--serif)}
+</style>
+</head>
+<body>
+<div class="toolbar"><b>Cadenas</b> · V1 · Page « Jeu » · Direction 03 / 03 — Vitrine (écart au brief) <button id="fit">Taille réelle</button></div>
+<div class="stage"><div class="board" id="board">
+
+  <div class="intro">
+    <h1><small>Direction 03</small>Vitrine</h1>
+    <p>Le cadenas posé seul sur un fond os, comme un objet de musée sous lumière de studio : c'est la seule chose dorée de l'écran, donc la plus lisible du feed. Les indices sont imprimés sur un cartel en papier, l'interface est à l'encre noire et en petites capitales. S'écarte du fond sombre du brief pour trancher dans un feed majoritairement sombre.</p>
+    <div class="swatches">
+      <div class="sw"><i style="background:#ebe9e3"></i>Fond os<br>#ebe9e3</div>
+      <div class="sw"><i style="background:#fbfaf7"></i>Papier<br>#fbfaf7</div>
+      <div class="sw"><i style="background:#a07a3e"></i>Laiton · accent<br>#a07a3e</div>
+      <div class="sw"><i style="background:#1b1a17"></i>Encre<br>#1b1a17</div>
+      <div class="sw"><i style="background:#8a867c"></i>Secondaire<br>#8a867c</div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div>
+      <div class="cap">Desktop · 1440 × 900 · post ouvert</div>
+      <div class="frame desk">
+        <div class="h-top"><i class="h-ph"></i><div class="h-search">Search</div><i class="h-av"></i></div>
+        <div class="h-body">
+          <aside class="h-rail"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></aside>
+          <article class="post">
+            <div class="p-head"><i></i><div><b>r/cadenas_dev</b> · 2 h · u/cadenas-app</div></div>
+            <div class="p-title">Cadenas · Friday, December 11</div>
+            <div class="slot" data-game></div>
+            <div class="p-act"><span>86 comments</span><span>Share</span></div>
+          </article>
+          <aside class="h-side"><div class="card" style="max-width:none;border:0;padding:16px;border-radius:12px;display:flex;flex-direction:column;gap:12px"><b>r/cadenas_dev</b><span></span><span style="width:80%"></span><span style="width:60%"></span></div></aside>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="cap">Mobile · 390 × 844 · post ouvert</div>
+      <div class="frame mob">
+        <div class="h-top"><i class="h-ph"></i><div class="h-search">Search</div><i class="h-av"></i></div>
+        <article class="post">
+          <div class="p-head"><i></i><div><b>r/cadenas_dev</b> · 2 h</div></div>
+          <div class="p-title">Cadenas · Friday, December 11</div>
+          <div class="slot" data-game></div>
+          <div class="p-act"><span>86 comments</span><span>Share</span></div>
+        </article>
+      </div>
+    </div>
+    <div class="states">
+      <div class="cap">États</div>
+      <div class="st"><h4>Fenêtre de molette</h4>
+        <div class="trio" data-trio></div>
+      </div>
+      <div class="st"><h4>Ouvrir</h4>
+        <div class="stack">
+          <button class="open">Open the lock</button>
+          <button class="open pressed">Open the lock</button>
+          <div class="locked"><i></i>Still locked. At least one clue is broken.</div>
+        </div>
+      </div>
+      <div class="st"><h4>Chargement</h4><div class="loading"><span>Oiling the locks…</span></div></div>
+      <div class="st"><h4>Mouvement</h4>
+        <ul class="notes">
+          <li><b>Cran</b> : tap sur le chevron ou glissé vertical dans la fenêtre ; le chiffre glisse 110 ms, clic feutré.</li>
+          <li><b>Ouverture</b> : l'anse se soulève, l'ombre au sol s'allonge, puis le cadenas pivote d'un quart vers le joueur.</li>
+          <li><b>Échec</b> : l'objet vacille sur son ombre, le message reste sur le cartel.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<template id="game">
+  <div class="g"><div class="gi">
+    <header class="g-top"><span class="mark">Cadenas</span><span>11.12 · 01:42 · Streak <b>12</b></span></header>
+    <div class="main">
+      <div class="obj">
+        <svg class="shackle" viewBox="0 0 170 92" aria-hidden="true">
+          <defs><linearGradient id="sh3" x1="0" x2="1"><stop offset="0" stop-color="#9a9790"/><stop offset=".3" stop-color="#f4f3ef"/><stop offset=".6" stop-color="#bdbab2"/><stop offset="1" stop-color="#77746c"/></linearGradient></defs>
+          <path d="M30 92 V64 A55 55 0 0 1 140 64 V92" fill="none" stroke="url(#sh3)" stroke-width="18"/>
+        </svg>
+        <div class="body"><div class="cols" data-cols></div></div>
+      </div>
+      <div class="card"><h3><span>Clues</span><span>Dec 11</span></h3><ol class="clues" data-clues></ol></div>
+    </div>
+    <div class="foot">
+      <p class="rule">Turn the dials until <em>every clue is true</em>.</p>
+      <button class="open">Open the lock</button>
+    </div>
+  </div></div>
+</template>
+
+<script>
+// Données réelles : generateCadenas('2026-12-11') — solution 6 3 0 3. Joueur en cours : 6 3 0 5, molette IV en main.
+const combo=[6,3,0,5], active=3, R=['I','II','III','IV'];
+const clues=[['ne',3,4],['sum',1,2,3],['par',1,'odd'],['sum',1,3,6],['sum',0,1,9],['par',3,'odd'],['gt',1,2]];
+const d=i=>`<span class="d">${R[i]}</span>`;
+const clueHTML=c=>c[0]==='sum'?`${d(c[1])}<span class="op">+</span>${d(c[2])}<span class="op">=</span><span class="v">${c[3]}</span>`
+  :c[0]==='ne'?`${d(c[1])}<span class="op">≠</span><span class="v">${c[2]}</span>`
+  :c[0]==='gt'?`${d(c[1])}<span class="op">&gt;</span>${d(c[2])}`:`${d(c[1])}<span class="w">is ${c[2]}</span>`;
+const up='<svg viewBox="0 0 12 8"><path d="M1 7 6 2l5 5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>';
+const dn='<svg viewBox="0 0 12 8"><path d="M1 1l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>';
+const col=(v,i,a)=>`<div class="col${a?' active':''}"><button class="chev" aria-label="dial ${i+1} up">${up}</button><div class="win"><b>${v}</b></div><button class="chev" aria-label="dial ${i+1} down">${dn}</button><small>${R[i]}</small></div>`;
+const tpl=document.getElementById('game');
+document.querySelectorAll('[data-game]').forEach(slot=>{
+  slot.appendChild(tpl.content.cloneNode(true));
+  slot.querySelector('[data-cols]').innerHTML=combo.map((v,i)=>col(v,i,i===active)).join('');
+  slot.querySelector('[data-clues]').innerHTML=clues.map(c=>`<li>${clueHTML(c)}</li>`).join('');
+});
+document.querySelector('[data-trio]').innerHTML=[[3,0,'repos'],[5,1,'en main'],[0,0,'survol']].map(([v,a,l],i)=>`<div style="--k:1${i===2?';filter:brightness(1.1)':''}">${col(v,i,a).replace('<small>'+R[i]+'</small>','')}${l}</div>`).join('');
+const board=document.getElementById('board'),stage=board.parentElement,btn=document.getElementById('fit');let real=false;
+function fit(){const s=real?1:Math.min(1,(innerWidth-48)/board.scrollWidth);board.style.transform=`scale(${s})`;stage.style.height=(board.scrollHeight*s+48)+'px';btn.textContent=real?'Ajuster à la fenêtre':'Taille réelle'}
+btn.onclick=()=>{real=!real;fit()};addEventListener('resize',fit);fit();
+</script>
+</body>
+</html>
